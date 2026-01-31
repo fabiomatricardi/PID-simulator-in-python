@@ -4,7 +4,7 @@
 
 PID simulator in python refactored from [original repo Destination2Unknown/PythonPID_Simulator](https://github.com/Destination2Unknown/PythonPID_Simulator/)
 
-You can download the executable App from the Releases section
+You can download the executable App [from the Releases section](https://github.com/fabiomatricardi/PID-simulator-in-python/releases/tag/PID_tuning_simulator)
 
 ### WHY THIS APP
 The two plots in the Python PID Simulator serve **complementary purposes** that together provide a complete picture of controller performance and behavior. This dual-plot design is intentional and extremely valuable for PID tuning education and diagnostics.
