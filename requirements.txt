@@ -2,3 +2,5 @@ matplotlib
 numpy
 ttkbootstrap
 scipy
+pillow
+pyinstaller
