@@ -1,6 +1,6 @@
 """
-   
-Updated and maintained by destination0b10unknown@gmail.com
+Refactored for python 3.12 and GUI by fabio.matricardi@gmail.com   
+Orignal code and repo by destination0b10unknown@gmail.com
 Copyright 2023 destination2unknown
 
 Licensed under the MIT License;
@@ -198,6 +198,9 @@ class FOPDT_Model(object):
     def update(self, work_PV, ts):
         """
         Update the process variable (PV) using the FOPDT model.
+        The error "setting an array element with a sequence" occurs because scipy.integrate.odeint returns a 2D array (shape (n_timepoints, 1)) 
+        when solving a scalar ODE, but your code tries to assign this array directly to a scalar position in a 1D NumPy array (self.PV[i + 1]). 
+        This shape mismatch triggers the error.
         """
         y = odeint(self._calc, work_PV, ts)
         return float(y[-1, 0])  # ✅ Extract scalar value (critical fix)
