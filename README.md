@@ -1,6 +1,6 @@
 # PID-simulator-in-python
 
-<img src='https://github.com/fabiomatricardi/PID-simulator-in-python/raw/main/1769869391.png' width=900>
+<img src='https://github.com/fabiomatricardi/PID-simulator-in-python/raw/main/header_image.png' width=900>
 
 PID simulator in python refactored from [original repo Destination2Unknown/PythonPID_Simulator](https://github.com/Destination2Unknown/PythonPID_Simulator/)
 
