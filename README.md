@@ -120,10 +120,12 @@ To match Excel reference plots (like those from Control Station or similar tools
 
 ## 🖼️ Screenshots
 
-![Simulator Interface](screenshot.png)
+<img src='https://github.com/fabiomatricardi/PID-simulator-in-python/raw/main/screenshot001.png' width=800>
+
 *Main application interface showing PID response simulation*
 
-![Parameter Tooltips](tooltips.png)
+<img src='https://github.com/fabiomatricardi/PID-simulator-in-python/raw/main/screenshot002.png' width=400> <img src='https://github.com/fabiomatricardi/PID-simulator-in-python/raw/main/screenshot003.png' width=400> 
+
 *Contextual help available for all parameters via hover tooltips*
 
 ## 📤 Export Formats
@@ -252,5 +254,16 @@ With these changes, your `.exe` will:
 - ✅ Work on any Windows machine (no Python required)
 - ✅ Preserve all simulator functionality
 - ✅ Show proper attribution footer
+
+---
+
+
+<img src='https://github.com/fabiomatricardi/PID-simulator-in-python/raw/main/1769884094.png' width=800>
+
+
+---
+
+
+
 
 This is the industry-standard approach used by professional Python desktop apps (e.g., KiCad, Thonny). 😊
