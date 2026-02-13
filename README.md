@@ -6,108 +6,186 @@ PID simulator in python refactored from [original repo Destination2Unknown/Pytho
 
 You can download the executable App [from the Releases section](https://github.com/fabiomatricardi/PID-simulator-in-python/releases/tag/PID_tuning_simulator)
 
-### WHY THIS APP
-The two plots in the Python PID Simulator serve **complementary purposes** that together provide a complete picture of controller performance and behavior. This dual-plot design is intentional and extremely valuable for PID tuning education and diagnostics.
+# Python PID Simulator
 
----
+A professional-grade PID controller simulator with First Order Plus Dead Time (FOPDT) process modeling, designed for control engineers, students, and process automation professionals to visualize and tune PID controllers in a realistic simulated environment.
 
-### 📊 Plot 1: System Response (Top Plot)
-**Shows:** How the *process* responds to control actions  
-**Variables displayed:**
-- **SP (Setpoint)** – Blue line: Target value the controller tries to achieve
-- **PV (Process Variable)** – Red line: Actual measured process value (e.g., temperature, pressure)
-- **CV (Control Variable)** – Dark green line: Controller's output signal sent to the actuator (e.g., valve position, heater power)
+## ✨ Key Features
 
-**What to look for:**
-| Behavior | What it means | Tuning implication |
-|----------|---------------|---------------------|
-| PV closely follows SP | ✅ Good control | Tuning is effective |
-| PV oscillates around SP | ⚠️ Underdamped | Reduce Kp or increase Kd |
-| PV lags behind SP | ⚠️ Slow response | Increase Kp or reduce dead time |
-| Steady offset between PV and SP | ⚠️ Steady-state error | Increase Ki (integral action) |
-| CV hits 0% or 100% limits | ⚠️ Actuator saturation | Reduce Kp or check process model |
+- **Realistic Process Simulation**: FOPDT model with dead time interpolation for fractional delays
+- **Industrial PID Implementation**: 
+  - Ti (Integral Time) in seconds (standard industrial unit) with internal conversion: `Ki = Kp / Ti`
+  - Derivative-on-measurement (avoids derivative kick on setpoint changes)
+  - Robust anti-windup protection with conditional integration
+- **Auto-Refresh**: Real-time simulation updates as parameters change (no manual refresh button needed)
+- **Fixed 1500-Second Simulation**: Consistent visualization window for performance comparison
+- **Professional Visualization**: Clean matplotlib plots with SP/PV/CV response curves
+- **Export Functionality**:
+  - PNG export for publication-quality plots (300 DPI)
+  - CSV export for detailed analysis in Excel/Python (includes all tuning parameters and time-series data)
+- **Parameter Validation**: Real-time checks for critical parameters (time constant > 0, dead time ≥ 0)
+- **Contextual Tooltips**: Hover explanations for all parameters and concepts
+- **Compact UI**: Optimized 1000px width layout for all screen sizes
 
-> 💡 **Key insight**: This plot answers *"Is the controller achieving the desired result?"*
+## 📦 Installation
 
----
+### Prerequisites
+- Python 3.8 or higher
+- pip package manager
 
-### 📈 Plot 2: Controller Internals (Bottom Plot)
-**Shows:** How the *PID algorithm* generates its control signal  
-**Variables displayed:**
-- **P Term** – Lime: Proportional response (`Kp × error`)
-- **I Term** – Orange: Integral accumulation (`Ki × ∫error dt`)
-- **D Term** – Purple: Derivative prediction (`Kd × d(error)/dt`)
-
-**What to look for:**
-| Term behavior | What it means | Tuning implication |
-|---------------|---------------|---------------------|
-| Large P spikes at setpoint changes | ✅ Expected behavior | Normal proportional action |
-| I term grows steadily over time | ✅ Eliminating offset | Healthy integral action |
-| I term saturates (flatlines at limits) | ⚠️ Integral windup | Implement anti-windup or reduce Ki |
-| D term shows high-frequency noise | ⚠️ Measurement noise amplified | Add derivative filter or reduce Kd |
-| D term opposes P term during changes | ✅ Good damping | Derivative is working correctly |
-
-> 💡 **Key insight**: This plot answers *"Why is the controller behaving this way?"* – it reveals the *mechanism* behind the response.
-
----
-
-### 🔬 Why Two Plots? Real-World Example
-
-Imagine you see **overshoot** in the top plot (PV spikes above SP):
-
-| Without bottom plot | With bottom plot |
-|---------------------|------------------|
-| ❓ *"Why is it overshooting?"* | ✅ *"P term is too aggressive (large spike) and D term is too small to dampen it"* |
-| Trial-and-error tuning | Targeted tuning: Reduce Kp *and/or* increase Kd |
-
-This diagnostic capability is why professional control engineers always examine **both** system response *and* controller internals during tuning.
-
----
-
-### 📐 Educational Value
-
-The simulator deliberately shows both perspectives because:
-
-1. **Top plot** teaches **control objectives**:
-   - Settling time
-   - Overshoot
-   - Steady-state error
-   - Disturbance rejection
-
-2. **Bottom plot** teaches **PID mechanics**:
-   - How P provides immediate response
-   - How I eliminates offset but causes windup
-   - How D provides damping but amplifies noise
-   - How terms interact during transients
-
-> 🎓 This dual-view approach is used in university control courses and industrial training because it bridges theory ("how PID works") with practice ("how the process responds").
-
----
-
-### 📌 Performance Metric: ITAE
-
-The title shows **ITAE** (Integral of Time-weighted Absolute Error):
+### Dependencies Installation
+```bash
+pip install ttkbootstrap matplotlib numpy scipy pillow
 ```
-ITAE = ∫ t × |SP(t) - PV(t)| dt
+
+### Optional (for PyInstaller bundling)
+```bash
+pip install pyinstaller
 ```
-- **Lower ITAE = Better performance**
-- Time-weighting penalizes *persistent* errors more than brief ones
-- Helps compare tuning strategies objectively (not just visually)
+
+## 🚀 Usage
+
+1. **Run the application**:
+   ```bash
+   python fixed_PID_Tuner.py
+   ```
+
+2. **Adjust parameters** in the left (Controller) and right (Process) panels:
+   - Changes automatically trigger simulation refresh
+   - Invalid parameters show visual feedback in the ITAE display
+
+3. **Interpret the plot** (middle panel):
+   - **Blue line**: Setpoint (SP) - target value
+   - **Red line**: Process Variable (PV) - simulated process response
+   - **Green line**: Controller Output (CV) - valve/actuator position
+
+4. **Export results**:
+   - Click "Export Plot (PNG)" for high-resolution images
+   - Click "Export Data (CSV)" for time-series analysis
+
+## 🔬 Technical Implementation
+
+### FOPDT Model Explained
+The simulator uses a **First Order Plus Dead Time (FOPDT)** model to represent real-world processes:
+
+```
+τ·dPV/dt = -PV + K·CV(t-θ) + Bias
+```
+
+Where:
+- **K (Gain)**: Change in PV per unit change in CV (e.g., °C/% valve opening)
+- **τ (Time Constant)**: Time to reach 63.2% of final value after a step change (seconds)
+- **θ (Dead Time)**: Delay between CV change and PV response (seconds)
+- **Bias**: Steady-state PV value when CV = 0
+
+FOPDT accurately models >80% of industrial processes (temperature, pressure, level, flow) and is the foundation for most PID tuning methods (Ziegler-Nichols, Cohen-Coon, etc.).
+
+### PID Controller Implementation
+The simulator implements the **parallel form** with industrial best practices:
+
+```
+CV = Kp·e + (Kp/Ti)·∫e·dt - Kd·d(PV)/dt
+```
+
+Key implementation details:
+- **Ti in seconds**: User-facing parameter (standard in industrial controllers) with internal conversion to Ki = Kp/Ti
+- **Derivative-on-measurement**: Uses `-Kd·d(PV)/dt` instead of `+Kd·d(SP)/dt` to prevent "derivative kick" when setpoint changes
+- **Anti-windup**: Conditional integration prevents integral term windup during output saturation
+- **Direction handling**: Automatically switches between Direct/Reverse action based on process gain sign
+
+### Simulation Parameters
+- Fixed duration: **1500 seconds** (consistent comparison baseline)
+- Setpoint profile:
+  - 0-10s: Initial steady state
+  - 10-650s: First step change (+1.0 units)
+  - 650-1500s: Second step change (+0.8 units)
+- Process noise: Minimal (`±0.002`) for clean reference matching (adjustable in source code)
+
+## 📊 Matching Reference Plots
+
+To match Excel reference plots (like those from Control Station or similar tools):
+
+1. **Use normalized parameters**:
+   - Process Gain: 0.76
+   - Time Constant: 39.0 sec
+   - Dead Time: 18.0 sec
+   - Bias: 0.0 (removed from calculations)
+
+2. **Use industrial tuning values**:
+   - Kp: 3.0
+   - Ti: 40.0 sec (not Ki!)
+   - Kd: 6.0 sec
+
+3. **Ensure minimal noise**: The simulator uses low noise (`±0.002`) by default to match clean reference plots. Increase noise in `self.noise = np.random.uniform(-0.002, 0.002, ...)` if needed for realism.
+
+## 🖼️ Screenshots
+
+![Simulator Interface](screenshot.png)
+*Main application interface showing PID response simulation*
+
+![Parameter Tooltips](tooltips.png)
+*Contextual help available for all parameters via hover tooltips*
+
+## 📤 Export Formats
+
+### PNG Export
+- 300 DPI resolution for publication quality
+- Tight layout with legends and grid lines
+- Filename: User-specified with `.png` extension
+
+### CSV Export Structure
+```csv
+Time (s),SP,PV,CV,P_Term,I_Term,D_Term,Kp,Ti_sec,Kd_sec,Process_Gain,Time_Constant_sec,Dead_Time_sec
+0,0.0000,0.0002,0.0000,0.0000,0.0000,0.0000,3.0000,40.0000,6.0000,0.7600,39.0000,18.0000
+1,0.0000,0.0003,0.0000,0.0000,0.0000,0.0000,3.0000,40.0000,6.0000,0.7600,39.0000,18.0000
+...
+```
+
+## 🙏 Credits & Attribution
+
+- Original concept and implementation: [destination0b10unknown](https://github.com/Destination2Unknown/PythonPID_Simulator/)
+- Enhanced implementation: Fabio Matricardi (fabio.matricardi@gmail.com)
+- FOPDT theory based on: "Process Control: Modeling, Design, and Simulation" by B. Wayne Bequette
+- Industrial PID practices aligned with: ISA-75.25 and "Advanced Control Unleashed" by Robert Rice
+
+## 📜 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+```
+Copyright (c) 2024 Fabio Matricardi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## 💡 Pro Tips
+
+1. **For aggressive tuning**: Decrease Ti (faster integral action) and increase Kd (more damping)
+2. **For sluggish processes**: Increase Kp and decrease Ti proportionally (maintain Kp/Ti ratio)
+3. **Dead time dominance**: When θ/τ > 0.5, consider Smith Predictor or model predictive control
+4. **Validation shortcut**: Press Tab between spinboxes for rapid parameter adjustment with auto-refresh
+5. **Noise adjustment**: Edit `self.noise = np.random.uniform(-0.002, 0.002, ...)` in source code for different noise levels
 
 ---
 
-### 💡 Pro Tip for Tuning
-
-Use the plots together in this workflow:
-1. **Observe top plot**: Identify problem (e.g., "too much overshoot")
-2. **Check bottom plot**: Diagnose cause (e.g., "P term too large, D term too small")
-3. **Adjust parameters**: Reduce Kp *and/or* increase Kd
-4. **Re-run simulation**: Verify improvement in *both* plots
-
-This closed-loop diagnostic approach is exactly how engineers tune real industrial controllers – just without risking plant shutdowns during experimentation! 😊
-
-
----
+*Developed with ♥ for control engineers worldwide*  
+*Tested on Windows 10/11 with Python 3.9-3.12*
 
 ---
 
@@ -116,16 +194,7 @@ This closed-loop diagnostic approach is exactly how engineers tune real industri
 ### 📦 Step 2: PyInstaller Build Command (Windows)
 
 ```bash
-pyinstaller ^
-  --windowed ^
-  --onefile ^
-  --name="PID_Simulator" ^
-  --collect-data ttkbootstrap ^
-  --hidden-import ttkbootstrap.style ^
-  --hidden-import ttkbootstrap.constants ^
-  --hidden-import matplotlib.backends.backend_tkagg ^
-  --add-data "logo.png;." ^
-  PythonPID_Simulator.pyw
+pyinstaller --windowed --onefile --collect-data ttkbootstrap --add-data "logo2.png;." --add-data "icon.ico;." --name="2026_PID_Simulator" --icon="icon.ico" fixed_PID_Tuner.py
 ```
 
 #### 🔑 Key Flag Explained:
@@ -142,7 +211,7 @@ pyinstaller ^
 1. **Build succeeds** without errors
 2. **Test on build machine**:
    ```bash
-   dist\PID_Simulator.exe
+   dist\2026_PID_Simulator.exe
    ```
    → Logo appears with transparency ✓
 3. **Test on clean Windows VM** (no Python installed):
@@ -164,26 +233,6 @@ pyinstaller ^
 --add-data "help.pdf;docs"
 ```
 → Structure: `source;destination` (destination is relative to bundle root)
-
-#### ❓ "Want a single-folder build instead of --onefile?"
-Use `--onedir` (faster startup, easier debugging):
-```bash
-pyinstaller ^
-  --windowed ^
-  --onedir ^
-  --collect-data ttkbootstrap ^
-  --add-data "logo.png;." ^
-  PythonPID_Simulator.pyw
-```
-→ Output: `dist\PID_Simulator\` folder containing `.exe` + assets
-
-#### 🔍 Debugging Tip: See where assets load from
-Add this temporary debug line before logo loading:
-```python
-print(f"Looking for logo at: {logo_path.absolute()}")
-print(f"sys._MEIPASS = {getattr(sys, '_MEIPASS', 'NOT SET')}")
-```
-→ Run the `.exe` from Command Prompt to see output
 
 ---
 
